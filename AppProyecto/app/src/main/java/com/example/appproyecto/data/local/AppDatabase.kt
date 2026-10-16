@@ -5,15 +5,29 @@ import androidx.room3.Database
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.example.appproyecto.data.model.Contacto
+import com.example.appproyecto.data.model.Evento
+import com.example.appproyecto.data.model.Oportunidad
+import com.example.appproyecto.data.model.Organizacion
 import com.example.appproyecto.data.model.Usuario
 
 @Database(
-    entities = [Usuario::class],
+    entities = [
+        Usuario::class,
+        Organizacion::class,
+        Contacto::class,
+        Evento::class,
+        Oportunidad::class
+    ],
     version = 1,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
+    abstract fun organizacionDao(): OrganizacionDao
+    abstract fun contactoDao(): ContactoDao
+    abstract fun eventoDao(): EventoDao
+    abstract fun oportunidadDao(): OportunidadDao
 
     companion object {
         @Volatile
