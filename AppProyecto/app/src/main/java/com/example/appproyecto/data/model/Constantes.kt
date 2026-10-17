@@ -52,6 +52,12 @@ enum class AreaContacto(val etiqueta: String) {
     ADMINISTRACION("Administración")
 }
 
+enum class Perfil(val etiqueta: String) {
+    EJECUTIVO("Ejecutivo comercial"),
+    SUPERVISOR("Supervisor comercial"),
+    MARKETING("Marketing / Comunicaciones")
+}
+
 /** Convierte un texto guardado en la base de datos de vuelta a su enum. */
 inline fun <reified T : Enum<T>> String.aEnum(porDefecto: T): T =
     enumValues<T>().firstOrNull { it.name == this } ?: porDefecto

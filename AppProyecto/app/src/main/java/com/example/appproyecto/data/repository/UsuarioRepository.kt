@@ -11,4 +11,6 @@ class UsuarioRepository(private val usuarioDao: UsuarioDao) {
         val usuario = usuarioDao.obtenerPorCorreo(correo.trim().lowercase()) ?: return null
         return usuario.takeIf { it.activo && it.passwordHash == sha256(password) }
     }
+
+    suspend fun obtenerPorId(id: Long): Usuario? = usuarioDao.obtenerPorId(id)
 }
