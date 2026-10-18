@@ -1,58 +1,82 @@
 package com.example.appproyecto.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.CompositionLocalProvider
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val EsquemaClaro = lightColorScheme(
+    primary = Azul40,
+    onPrimary = Blanco,
+    primaryContainer = Azul90,
+    onPrimaryContainer = Azul10,
+    secondary = Gris40,
+    onSecondary = Blanco,
+    secondaryContainer = Gris90,
+    onSecondaryContainer = Gris10,
+    tertiary = Turquesa40,
+    onTertiary = Blanco,
+    tertiaryContainer = Turquesa90,
+    onTertiaryContainer = Turquesa10,
+    error = Rojo40,
+    onError = Blanco,
+    errorContainer = Rojo90,
+    onErrorContainer = Rojo10,
+    background = Neutro99,
+    onBackground = Neutro10,
+    surface = Neutro99,
+    onSurface = Neutro10,
+    surfaceVariant = NeutroVar90,
+    onSurfaceVariant = NeutroVar30,
+    outline = NeutroVar50,
+    outlineVariant = NeutroVar80
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val EsquemaOscuro = darkColorScheme(
+    primary = Azul80,
+    onPrimary = Azul20,
+    primaryContainer = Azul30,
+    onPrimaryContainer = Azul90,
+    secondary = Gris80,
+    onSecondary = Gris30,
+    secondaryContainer = Gris30,
+    onSecondaryContainer = Gris90,
+    tertiary = Turquesa80,
+    onTertiary = Turquesa30,
+    tertiaryContainer = Turquesa30,
+    onTertiaryContainer = Turquesa90,
+    error = Rojo80,
+    onError = Rojo10,
+    errorContainer = Rojo40,
+    onErrorContainer = Rojo90,
+    background = Neutro10,
+    onBackground = Neutro90,
+    surface = Neutro10,
+    onSurface = Neutro90,
+    surfaceVariant = NeutroVar30,
+    onSurfaceVariant = NeutroVar80,
+    outline = NeutroVar60,
+    outlineVariant = NeutroVar30
 )
 
+/**
+ * Tema de la app. No usa "color dinámico" del sistema a propósito: así los colores de marca y los
+ * semánticos (estados, éxito, advertencia) se ven igual en todos los teléfonos.
+ */
 @Composable
 fun AppProyectoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    CompositionLocalProvider(
+        LocalColoresApp provides (if (darkTheme) ColoresAppOscuro else ColoresAppClaro)
+    ) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) EsquemaOscuro else EsquemaClaro,
+            typography = Typography,
+            content = content
+        )
     }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
 }

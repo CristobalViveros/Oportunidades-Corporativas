@@ -11,5 +11,6 @@ data class OportunidadItem(
     val eventoFecha: Long,
     val comuna: String,
     val organizacionNombre: String,
+    val responsableId: Long,
     val responsableNombre: String
-)   
+)

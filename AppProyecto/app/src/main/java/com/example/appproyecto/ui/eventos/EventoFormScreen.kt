@@ -1,11 +1,11 @@
 package com.example.appproyecto.ui.eventos
 
-import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,12 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Group
@@ -27,6 +30,7 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,16 +50,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appproyecto.data.model.TipoOportunidad
+import com.example.appproyecto.data.model.aEnum
+import com.example.appproyecto.ui.componentes.CampoFecha
 import com.example.appproyecto.ui.oportunidades.CampoDesplegable
 import com.example.appproyecto.ui.oportunidades.CampoTexto
 import com.example.appproyecto.util.copiarDesdeGaleria
 import com.example.appproyecto.util.crearArchivoFoto
-import com.example.appproyecto.util.formatearFecha
 import com.example.appproyecto.util.uriDeArchivo
 import java.io.File
-import java.util.Calendar
-
-private val TIPOS_EVENTO = listOf("Feria", "Seminario", "Aniversario", "Evento deportivo", "Otro")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,7 +153,8 @@ fun EventoFormScreen(
 
             CampoDesplegable(
                 etiqueta = "Tipo de evento", icono = Icons.Filled.Category,
-                textoActual = s.tipo, opciones = TIPOS_EVENTO.map { it to it },
+                textoActual = s.tipo.aEnum(TipoOportunidad.OTRA).etiqueta,
+                opciones = TipoOportunidad.entries.map { it.name to it.etiqueta },
                 error = null, onElegir = viewModel::cambiarTipo
             )
 
@@ -161,34 +165,20 @@ fun EventoFormScreen(
                 error = s.errorOrganizacion, onElegir = viewModel::elegirOrganizacion
             )
 
-            // Selector de fecha nativo de Android.
-            OutlinedButton(
-                onClick = {
-                    val c = Calendar.getInstance()
-                    DatePickerDialog(
-                        context,
-                        { _, anio, mes, dia ->
-                            val elegido = Calendar.getInstance().apply {
-                                set(anio, mes, dia, 0, 0, 0)
-                                set(Calendar.MILLISECOND, 0)
-                            }
-                            viewModel.fijarFecha(elegido.timeInMillis)
-                        },
-                        c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)
-                    ).show()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Filled.CalendarMonth, contentDescription = null)
-                Text("  " + (s.fecha?.let { formatearFecha(it) } ?: "Elegir fecha del evento"))
-            }
-            s.errorFecha?.let {
-                Text(
-                    it, color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-            }
+            // Selector de fecha nativo; el error se muestra debajo, como en los demás campos.
+            CampoFecha(
+                etiqueta = "Fecha del evento", fecha = s.fecha, error = s.errorFecha,
+                onElegir = viewModel::fijarFecha
+            )
+            CampoFecha(
+                etiqueta = "Fecha de término (opcional)", fecha = s.fechaTermino, error = s.errorFechaTermino,
+                onElegir = viewModel::fijarFechaTermino, onQuitar = viewModel::quitarFechaTermino
+            )
+
+            CampoTexto(
+                valor = s.region, etiqueta = "Región", icono = Icons.Filled.Map,
+                error = s.errorRegion, onCambio = viewModel::cambiarRegion
+            )
 
             CampoTexto(
                 valor = s.comuna, etiqueta = "Comuna", icono = Icons.Filled.Place,
@@ -196,13 +186,36 @@ fun EventoFormScreen(
             )
 
             CampoTexto(
+                valor = s.direccion, etiqueta = "Dirección", icono = Icons.Filled.LocationOn,
+                error = s.errorDireccion, maximo = 120, onCambio = viewModel::cambiarDireccion
+            )
+
+            CampoTexto(
                 valor = s.publicoEsperado, etiqueta = "Público esperado", icono = Icons.Filled.Group,
                 error = s.errorPublico, onCambio = viewModel::cambiarPublico
             )
 
-            Button(onClick = viewModel::guardar, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Filled.Save, contentDescription = null)
-                Text("  Guardar evento")
+            CampoTexto(
+                valor = s.costo, etiqueta = "Costo referencial en pesos (opcional)", icono = Icons.Filled.AttachMoney,
+                error = s.errorCosto, onCambio = viewModel::cambiarCosto
+            )
+
+            // Error de la operación (por ejemplo, un evento repetido).
+            AnimatedVisibility(visible = s.errorGeneral != null) {
+                Text(
+                    text = s.errorGeneral.orEmpty(),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Button(onClick = viewModel::guardar, enabled = !s.guardando, modifier = Modifier.fillMaxWidth()) {
+                if (s.guardando) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                } else {
+                    Icon(Icons.Filled.Save, contentDescription = null)
+                    Text("  Guardar evento")
+                }
             }
         }
     }

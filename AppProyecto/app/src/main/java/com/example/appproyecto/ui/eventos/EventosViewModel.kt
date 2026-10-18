@@ -15,4 +15,4 @@ class EventosViewModel(application: Application) : AndroidViewModel(application)
 
     val eventos: StateFlow<List<Evento>> = repository.observarTodos()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-}
+}

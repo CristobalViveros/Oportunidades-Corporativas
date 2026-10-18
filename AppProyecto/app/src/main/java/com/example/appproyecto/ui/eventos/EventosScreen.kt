@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appproyecto.data.model.TipoOportunidad
+import com.example.appproyecto.data.model.aEnum
 import com.example.appproyecto.util.formatearFecha
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +51,7 @@ fun EventosScreen(viewModel: EventosViewModel = viewModel()) {
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(evento.nombre, style = MaterialTheme.typography.titleMedium)
-                            Text("${evento.tipo} · ${formatearFecha(evento.fechaInicio)}")
+                            Text("${evento.tipo.aEnum(TipoOportunidad.OTRA).etiqueta} · ${formatearFecha(evento.fechaInicio)}")
                             Text("${evento.comuna} · ${evento.publicoEsperado} personas esperadas")
                         }
                     }
@@ -57,4 +59,4 @@ fun EventosScreen(viewModel: EventosViewModel = viewModel()) {
             }
         }
     }
-}
+}

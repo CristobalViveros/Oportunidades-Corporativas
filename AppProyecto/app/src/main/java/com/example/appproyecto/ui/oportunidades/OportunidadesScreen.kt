@@ -1,6 +1,8 @@
 package com.example.appproyecto.ui.oportunidades
 
 import androidx.compose.animation.AnimatedVisibility
+import com.example.appproyecto.ui.componentes.InsigniaEstado
+import com.example.appproyecto.ui.theme.coloresApp
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -41,17 +44,28 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appproyecto.data.model.EstadoOportunidad
 import com.example.appproyecto.data.model.OportunidadItem
+import com.example.appproyecto.data.model.Perfil
 import com.example.appproyecto.data.model.Prioridad
 import com.example.appproyecto.data.model.aEnum
 import com.example.appproyecto.util.formatearFecha
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OportunidadesScreen(onEditar: (Long) -> Unit, viewModel: OportunidadesViewModel = viewModel()) {
+fun OportunidadesScreen(
+    onAbrirOportunidad: (Long) -> Unit,
+    viewModel: OportunidadesViewModel = viewModel()
+) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text("Oportunidades") })
+        TopAppBar(
+            title = {
+                Text(
+                    if (estado.perfil == Perfil.SUPERVISOR) "Todas las oportunidades"
+                    else "Mis oportunidades"
+                )
+            }
+        )
 
         OutlinedTextField(
             value = estado.busqueda,
@@ -105,6 +119,14 @@ fun OportunidadesScreen(onEditar: (Long) -> Unit, viewModel: OportunidadesViewMo
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         )
 
+        if (estado.cargando) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(24.dp)
+            )
+        }
+
         // Animación: el mensaje de "sin resultados" aparece y desaparece suavemente.
         AnimatedVisibility(visible = estado.oportunidades.isEmpty() && !estado.cargando) {
             Text(
@@ -120,22 +142,27 @@ fun OportunidadesScreen(onEditar: (Long) -> Unit, viewModel: OportunidadesViewMo
         ) {
             items(estado.oportunidades, key = { it.id }) { item ->
                 // animateItem(): las tarjetas se mueven suavemente cuando cambia la lista.
-                TarjetaOportunidad(item, modifier = Modifier.animateItem())
+                TarjetaOportunidad(
+                    item = item,
+                    onClick = { onAbrirOportunidad(item.id) },
+                    modifier = Modifier.animateItem()
+                )
             }
         }
     }
 }
 
 @Composable
-private fun TarjetaOportunidad(item: OportunidadItem, modifier: Modifier = Modifier) {
+private fun TarjetaOportunidad(
+    item: OportunidadItem,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val prioridad = item.prioridad.aEnum(Prioridad.MEDIA)
     val estadoOp = item.estado.aEnum(EstadoOportunidad.EVENTO_IDENTIFICADO)
 
-    val colorObjetivo = when (prioridad) {
-        Prioridad.ALTA -> MaterialTheme.colorScheme.errorContainer
-        Prioridad.MEDIA -> MaterialTheme.colorScheme.tertiaryContainer
-        Prioridad.BAJA -> MaterialTheme.colorScheme.surfaceVariant
-    }
+    // Colores semánticos del tema: alta = peligro, media = advertencia, baja = neutro.
+    val colorObjetivo = MaterialTheme.coloresApp.paraPrioridad(prioridad).fondo
     // Animación: si cambia la prioridad, el color de la tarjeta cambia de forma gradual.
     val colorTarjeta by animateColorAsState(
         targetValue = colorObjetivo,
@@ -144,6 +171,7 @@ private fun TarjetaOportunidad(item: OportunidadItem, modifier: Modifier = Modif
     )
 
     Card(
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize(),
@@ -154,11 +182,7 @@ private fun TarjetaOportunidad(item: OportunidadItem, modifier: Modifier = Modif
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(item.nombre, style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = estadoOp.etiqueta,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
+            InsigniaEstado(estadoOp)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Event, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))

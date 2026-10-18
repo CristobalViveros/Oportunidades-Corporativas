@@ -19,4 +19,4 @@ fun filtrarOportunidades(
         val coincidePrioridad = prioridad == null || item.prioridad == prioridad.name
         coincideTexto && coincideEstado && coincidePrioridad
     }
-}
+}

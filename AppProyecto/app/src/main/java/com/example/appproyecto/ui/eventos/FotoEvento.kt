@@ -41,4 +41,4 @@ fun FotoEvento(ruta: String?, modifier: Modifier = Modifier) {
             Icon(Icons.Filled.Photo, contentDescription = "Sin foto")
         }
     }
-}
+}

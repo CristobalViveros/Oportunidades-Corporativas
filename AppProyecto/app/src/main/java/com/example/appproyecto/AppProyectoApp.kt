@@ -14,4 +14,4 @@ class AppProyectoApp : Application() {
             sembrarDatosDemo(AppDatabase.getInstance(this@AppProyectoApp))
         }
     }
-}
+}
