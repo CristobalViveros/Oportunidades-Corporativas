@@ -9,7 +9,7 @@ Aplicación Android nativa (Kotlin + Jetpack Compose) para que un equipo comerci
 
 | Nombre | Rol en el proyecto | GitHub |
 |---|---|---|
-| Ignacio Espinoza | Desarrollador | [usuario-github] |
+| Ignacio Espinoza | Desarrollador | [IgnacioEspinoza](https://github.com/IgnacioEspinoza333) |
 | Cristóbal Viveros | Desarrollador | [CristobalViveros](https://github.com/CristobalViveros) |
 
 ## Descripción
