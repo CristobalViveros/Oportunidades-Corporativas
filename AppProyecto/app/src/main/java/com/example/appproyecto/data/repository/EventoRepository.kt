@@ -6,4 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 class EventoRepository(private val eventoDao: EventoDao) {
     fun observarTodos(): Flow<List<Evento>> = eventoDao.observarTodos()
+
+    suspend fun insertar(evento: Evento) = eventoDao.insertar(evento)
 }
+
