@@ -46,6 +46,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "oportunidades.db"
                 )
                     .setDriver(BundledSQLiteDriver())
+                    .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
                     .also { INSTANCE = it }
             }
