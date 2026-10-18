@@ -138,7 +138,7 @@ fun OportunidadFormScreen(
 }
 
 @Composable
-private fun CampoTexto(
+fun CampoTexto(
     valor: String,
     etiqueta: String,
     icono: ImageVector,
@@ -172,7 +172,7 @@ private fun CampoTexto(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun <T> CampoDesplegable(
+fun <T> CampoDesplegable(
     etiqueta: String,
     icono: ImageVector,
     textoActual: String,
