@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.filled.Work
@@ -29,27 +32,40 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.appproyecto.data.model.Perfil
+import com.example.appproyecto.ui.dashboard.DashboardScreen
+import com.example.appproyecto.ui.directorio.DirectorioScreen
+import com.example.appproyecto.ui.eventos.EventosScreen
 import com.example.appproyecto.ui.oportunidades.OportunidadesScreen
 import com.example.appproyecto.ui.perfil.PerfilScreen
 import com.example.appproyecto.ui.supervisor.PanelSupervisorScreen
 import com.example.appproyecto.util.rol
 
 enum class Pestana(val ruta: String, val titulo: String, val icono: ImageVector) {
+    INICIO("inicio", "Inicio", Icons.Filled.Home),
     OPORTUNIDADES("oportunidades", "Oportunidades", Icons.Filled.Work),
+    EVENTOS("eventos", "Eventos", Icons.Filled.Event),
+    DIRECTORIO("directorio", "Directorio", Icons.Filled.Business),
     PANEL("panel", "Equipo", Icons.Filled.SupervisorAccount),
     PERFIL("perfil", "Perfil", Icons.Filled.Person)
 }
 
-/** Cada rol ve sus propias pestañas: solo el supervisor tiene el panel de equipo. */
+/**
+ * Cada rol ve sus propias pestañas: solo el supervisor tiene el panel de equipo.
+ * El perfil no es una pestaña (para no pasar de 5 en la barra): se abre desde el ícono de Inicio.
+ */
 fun pestanasPara(rol: Perfil): List<Pestana> = when (rol) {
-    Perfil.EJECUTIVO -> listOf(Pestana.OPORTUNIDADES, Pestana.PERFIL)
-    Perfil.SUPERVISOR -> listOf(Pestana.OPORTUNIDADES, Pestana.PANEL, Pestana.PERFIL)
+    Perfil.EJECUTIVO -> listOf(Pestana.INICIO, Pestana.OPORTUNIDADES, Pestana.EVENTOS, Pestana.DIRECTORIO)
+    Perfil.SUPERVISOR -> listOf(Pestana.INICIO, Pestana.OPORTUNIDADES, Pestana.EVENTOS, Pestana.DIRECTORIO, Pestana.PANEL)
 }
 
 @Composable
 fun PrincipalScreen(
     onCerrarSesion: () -> Unit,
     onNuevaOportunidad: () -> Unit,
+    onAbrirOportunidad: (Long) -> Unit,
+    onNuevoEvento: () -> Unit,
+    onNuevaOrganizacion: () -> Unit,
+    onAbrirOrganizacion: (Long) -> Unit,
     viewModel: PrincipalViewModel = viewModel()
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
@@ -68,7 +84,11 @@ fun PrincipalScreen(
         ContenidoPrincipal(
             rol = usuario.rol(),
             onCerrarSesion = onCerrarSesion,
-            onNuevaOportunidad = onNuevaOportunidad
+            onNuevaOportunidad = onNuevaOportunidad,
+            onAbrirOportunidad = onAbrirOportunidad,
+            onNuevoEvento = onNuevoEvento,
+            onNuevaOrganizacion = onNuevaOrganizacion,
+            onAbrirOrganizacion = onAbrirOrganizacion
         )
     }
 }
@@ -77,7 +97,11 @@ fun PrincipalScreen(
 private fun ContenidoPrincipal(
     rol: Perfil,
     onCerrarSesion: () -> Unit,
-    onNuevaOportunidad: () -> Unit
+    onNuevaOportunidad: () -> Unit,
+    onAbrirOportunidad: (Long) -> Unit,
+    onNuevoEvento: () -> Unit,
+    onNuevaOrganizacion: () -> Unit,
+    onAbrirOrganizacion: (Long) -> Unit
 ) {
     val navController = rememberNavController()
     val entradaActual by navController.currentBackStackEntryAsState()
@@ -87,9 +111,15 @@ private fun ContenidoPrincipal(
         // Cada pantalla interna maneja su propio TopAppBar, así evitamos espacios dobles.
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
-            if (rutaActual == Pestana.OPORTUNIDADES.ruta) {
-                FloatingActionButton(onClick = onNuevaOportunidad) {
+            when (rutaActual) {
+                Pestana.OPORTUNIDADES.ruta -> FloatingActionButton(onClick = onNuevaOportunidad) {
                     Icon(Icons.Filled.Add, contentDescription = "Nueva oportunidad")
+                }
+                Pestana.EVENTOS.ruta -> FloatingActionButton(onClick = onNuevoEvento) {
+                    Icon(Icons.Filled.Add, contentDescription = "Nuevo evento")
+                }
+                Pestana.DIRECTORIO.ruta -> FloatingActionButton(onClick = onNuevaOrganizacion) {
+                    Icon(Icons.Filled.Add, contentDescription = "Nueva organización")
                 }
             }
         },
@@ -114,10 +144,24 @@ private fun ContenidoPrincipal(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Pestana.OPORTUNIDADES.ruta,
+            startDestination = Pestana.INICIO.ruta,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Pestana.OPORTUNIDADES.ruta) { OportunidadesScreen() }
+            composable(Pestana.INICIO.ruta) {
+                DashboardScreen(
+                    onAbrirOportunidad = onAbrirOportunidad,
+                    onAbrirPerfil = {
+                        navController.navigate(Pestana.PERFIL.ruta) { launchSingleTop = true }
+                    }
+                )
+            }
+            composable(Pestana.OPORTUNIDADES.ruta) {
+                OportunidadesScreen(onAbrirOportunidad = onAbrirOportunidad)
+            }
+            composable(Pestana.EVENTOS.ruta) { EventosScreen() }
+            composable(Pestana.DIRECTORIO.ruta) {
+                DirectorioScreen(onAbrirOrganizacion = onAbrirOrganizacion)
+            }
             // La ruta del panel ni siquiera existe para un ejecutivo.
             if (rol == Perfil.SUPERVISOR) {
                 composable(Pestana.PANEL.ruta) { PanelSupervisorScreen() }

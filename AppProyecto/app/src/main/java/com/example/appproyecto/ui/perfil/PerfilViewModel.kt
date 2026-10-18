@@ -28,4 +28,4 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun cerrarSesion() = sesion.cerrar()
-}
+}

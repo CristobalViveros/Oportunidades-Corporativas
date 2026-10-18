@@ -19,4 +19,4 @@ class SesionManager(context: Context) {
     fun usuarioId(): Long? = prefs.getLong("usuario_id", -1L).takeIf { it != -1L }
 
     fun cerrar() = prefs.edit().remove("usuario_id").apply()
-}
+}

@@ -1,0 +1,35 @@
+package com.example.appproyecto.data.model
+
+/** Todo lo necesario para la pantalla de detalle: oportunidad + evento + organización + responsable. */
+data class OportunidadDetalle(
+    val id: Long,
+    val nombre: String,
+    val tipo: String,
+    val descripcion: String,
+    val fuente: String,
+    val fechaDeteccion: Long,
+    val prioridad: String,
+    val potencial: Int,
+    val afinidad: Int,
+    val estado: String,
+    val fechaLimitePostulacion: Long?,
+    val fechaActualizacion: Long,
+    val observaciones: String,
+    val responsableId: Long,
+    val responsableNombre: String,
+    val eventoId: Long,
+    val eventoNombre: String,
+    val fechaInicio: Long,
+    val fechaTermino: Long,
+    val horario: String,
+    val direccion: String,
+    val comuna: String,
+    val region: String,
+    val publicoEsperado: Int,
+    val publicoObjetivo: String,
+    val condiciones: String,
+    val costoReferencial: Int,
+    val fotoUri: String?,
+    val organizacionId: Long,
+    val organizacionNombre: String
+)

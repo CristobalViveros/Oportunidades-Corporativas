@@ -7,6 +7,7 @@ import androidx.room3.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.example.appproyecto.data.model.Contacto
 import com.example.appproyecto.data.model.Evento
+import com.example.appproyecto.data.model.Evidencia
 import com.example.appproyecto.data.model.Oportunidad
 import com.example.appproyecto.data.model.Organizacion
 import com.example.appproyecto.data.model.Seguimiento
@@ -19,9 +20,10 @@ import com.example.appproyecto.data.model.Usuario
         Contacto::class,
         Evento::class,
         Oportunidad::class,
-        Seguimiento::class
+        Seguimiento::class,
+        Evidencia::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -31,6 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun eventoDao(): EventoDao
     abstract fun oportunidadDao(): OportunidadDao
     abstract fun seguimientoDao(): SeguimientoDao
+    abstract fun evidenciaDao(): EvidenciaDao
 
     companion object {
         @Volatile

@@ -3,10 +3,12 @@ package com.example.appproyecto.ui.oportunidades
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -18,8 +20,16 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Title
-import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material3.Card
+import com.example.appproyecto.data.model.TipoOportunidad
+import com.example.appproyecto.data.model.aEnum
+import com.example.appproyecto.ui.componentes.CampoFecha
+import com.example.appproyecto.util.formatearFecha
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -38,13 +48,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.appproyecto.data.model.EstadoOportunidad
 import com.example.appproyecto.data.model.Prioridad
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,62 +86,140 @@ fun OportunidadFormScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            CampoTexto(
-                valor = s.nombre, etiqueta = "Nombre de la oportunidad",
-                icono = Icons.Filled.Title, error = s.errorNombre,
-                onCambio = viewModel::cambiarNombre
-            )
+        when {
+            s.cargando -> Box(
+                modifier = Modifier.padding(padding).fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) { CircularProgressIndicator() }
 
-            CampoDesplegable(
-                etiqueta = "Evento",
-                icono = Icons.Filled.Event,
-                textoActual = s.eventos.firstOrNull { it.id == s.eventoId }?.nombre ?: "",
-                opciones = s.eventos.map { it.id to it.nombre },
-                error = s.errorEvento,
-                onElegir = viewModel::elegirEvento
-            )
+            s.bloqueado -> Box(
+                modifier = Modifier.padding(padding).fillMaxSize().padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = s.errorGeneral ?: "No tienes acceso a esta oportunidad",
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
 
-            CampoDesplegable(
-                etiqueta = "Prioridad",
-                icono = Icons.Filled.Flag,
-                textoActual = s.prioridad.etiqueta,
-                opciones = Prioridad.entries.map { it to it.etiqueta },
-                error = null,
-                onElegir = viewModel::elegirPrioridad
-            )
+            else -> Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CampoTexto(
+                    valor = s.nombre, etiqueta = "Nombre de la oportunidad",
+                    icono = Icons.Filled.Title, error = s.errorNombre,
+                    onCambio = viewModel::cambiarNombre
+                )
 
-            CampoDesplegable(
-                etiqueta = "Estado",
-                icono = Icons.Filled.Timeline,
-                textoActual = s.estado.etiqueta,
-                opciones = EstadoOportunidad.entries.map { it to it.etiqueta },
-                error = null,
-                onElegir = viewModel::elegirEstado
-            )
+                CampoDesplegable(
+                    etiqueta = "Evento",
+                    icono = Icons.Filled.Event,
+                    textoActual = s.eventos.firstOrNull { it.id == s.eventoId }?.nombre ?: "",
+                    opciones = s.eventos.map { it.id to it.nombre },
+                    error = s.errorEvento,
+                    onElegir = viewModel::elegirEvento
+                )
 
-            CampoTexto(
-                valor = s.descripcion, etiqueta = "Descripción (opcional)",
-                icono = Icons.Filled.Description, error = s.errorDescripcion,
-                maximo = 300, lineas = 3, onCambio = viewModel::cambiarDescripcion
-            )
+                // Resumen del evento elegido: fecha, ubicación, tipo y público de la oportunidad.
+                s.eventoSeleccionado?.let { ev ->
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text("Datos del evento", style = MaterialTheme.typography.labelLarge)
+                            Text("${formatearFecha(ev.fechaInicio)} · ${ev.tipo.aEnum(TipoOportunidad.OTRA).etiqueta}")
+                            Text(listOf(ev.direccion, ev.comuna).filter { it.isNotBlank() }.joinToString(", "))
+                            Text("${ev.publicoEsperado} personas esperadas")
+                        }
+                    }
+                }
 
-            CampoTexto(
-                valor = s.observaciones, etiqueta = "Observaciones (opcional)",
-                icono = Icons.Filled.Notes, error = s.errorObservaciones,
-                maximo = 300, lineas = 3, onCambio = viewModel::cambiarObservaciones
-            )
+                // Solo el supervisor asigna responsable al crear.
+                if (s.puedeElegirResponsable) {
+                    CampoDesplegable(
+                        etiqueta = "Responsable",
+                        icono = Icons.Filled.Person,
+                        textoActual = s.ejecutivos.firstOrNull { it.id == s.responsableId }?.nombre ?: "",
+                        opciones = s.ejecutivos.map { it.id to it.nombre },
+                        error = s.errorResponsable,
+                        onElegir = viewModel::elegirResponsable
+                    )
+                }
 
-            Button(onClick = viewModel::guardar, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Filled.Save, contentDescription = null)
-                Text("  Guardar")
+                if (s.puedeEditarPrioridad) {
+                    CampoDesplegable(
+                        etiqueta = "Prioridad",
+                        icono = Icons.Filled.Flag,
+                        textoActual = s.prioridad.etiqueta,
+                        opciones = Prioridad.entries.map { it to it.etiqueta },
+                        error = null,
+                        onElegir = viewModel::elegirPrioridad
+                    )
+                }
+
+                CampoDesplegable(
+                    etiqueta = "Potencial comercial (1 a 5)",
+                    icono = Icons.Filled.Star,
+                    textoActual = s.potencial.toString(),
+                    opciones = (1..5).map { it to it.toString() },
+                    error = null,
+                    onElegir = viewModel::elegirPotencial
+                )
+                CampoDesplegable(
+                    etiqueta = "Afinidad con la marca (1 a 5)",
+                    icono = Icons.Filled.ThumbUp,
+                    textoActual = s.afinidad.toString(),
+                    opciones = (1..5).map { it to it.toString() },
+                    error = null,
+                    onElegir = viewModel::elegirAfinidad
+                )
+                CampoFecha(
+                    etiqueta = "Fecha límite de postulación (opcional)",
+                    fecha = s.fechaLimite,
+                    error = s.errorFechaLimite,
+                    onElegir = viewModel::fijarFechaLimite,
+                    onQuitar = viewModel::quitarFechaLimite
+                )
+
+                CampoTexto(
+                    valor = s.descripcion, etiqueta = "Descripción (opcional)",
+                    icono = Icons.Filled.Description, error = s.errorDescripcion,
+                    maximo = 300, lineas = 3, onCambio = viewModel::cambiarDescripcion
+                )
+
+                CampoTexto(
+                    valor = s.observaciones, etiqueta = "Observaciones (opcional)",
+                    icono = Icons.Filled.Notes, error = s.errorObservaciones,
+                    maximo = 300, lineas = 3, onCambio = viewModel::cambiarObservaciones
+                )
+
+                // Error de la operación (por ejemplo, permisos o responsable inválido).
+                AnimatedVisibility(visible = s.errorGeneral != null) {
+                    Text(
+                        text = s.errorGeneral.orEmpty(),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Button(
+                    onClick = viewModel::guardar,
+                    enabled = !s.guardando,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (s.guardando) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Icon(Icons.Filled.Save, contentDescription = null)
+                        Text("  Guardar")
+                    }
+                }
             }
         }
     }

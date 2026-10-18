@@ -16,4 +16,4 @@ class UsuarioRepository(private val usuarioDao: UsuarioDao) {
     suspend fun obtenerPorId(id: Long): Usuario? = usuarioDao.obtenerPorId(id)
 
     fun observarEjecutivos(): Flow<List<Usuario>> = usuarioDao.observarEjecutivos()
-}
+}

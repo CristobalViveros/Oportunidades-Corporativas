@@ -20,4 +20,11 @@ interface EventoDao {
 
     @Query("SELECT * FROM eventos WHERE id = :id LIMIT 1")
     suspend fun obtenerPorId(id: Long): Evento?
+
+    /** Mismo nombre (sin distinguir mayúsculas), misma fecha y misma organización = evento repetido. */
+    @Query(
+        "SELECT COUNT(*) FROM eventos WHERE LOWER(nombre) = LOWER(:nombre) " +
+            "AND fechaInicio = :fechaInicio AND organizacionId = :organizacionId"
+    )
+    suspend fun contarDuplicados(nombre: String, fechaInicio: Long, organizacionId: Long): Int
 }

@@ -1,6 +1,8 @@
 package com.example.appproyecto.ui.oportunidades
 
 import androidx.compose.animation.AnimatedVisibility
+import com.example.appproyecto.ui.componentes.InsigniaEstado
+import com.example.appproyecto.ui.theme.coloresApp
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -49,7 +51,10 @@ import com.example.appproyecto.util.formatearFecha
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OportunidadesScreen(viewModel: OportunidadesViewModel = viewModel()) {
+fun OportunidadesScreen(
+    onAbrirOportunidad: (Long) -> Unit,
+    viewModel: OportunidadesViewModel = viewModel()
+) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -137,22 +142,27 @@ fun OportunidadesScreen(viewModel: OportunidadesViewModel = viewModel()) {
         ) {
             items(estado.oportunidades, key = { it.id }) { item ->
                 // animateItem(): las tarjetas se mueven suavemente cuando cambia la lista.
-                TarjetaOportunidad(item, modifier = Modifier.animateItem())
+                TarjetaOportunidad(
+                    item = item,
+                    onClick = { onAbrirOportunidad(item.id) },
+                    modifier = Modifier.animateItem()
+                )
             }
         }
     }
 }
 
 @Composable
-private fun TarjetaOportunidad(item: OportunidadItem, modifier: Modifier = Modifier) {
+private fun TarjetaOportunidad(
+    item: OportunidadItem,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val prioridad = item.prioridad.aEnum(Prioridad.MEDIA)
     val estadoOp = item.estado.aEnum(EstadoOportunidad.EVENTO_IDENTIFICADO)
 
-    val colorObjetivo = when (prioridad) {
-        Prioridad.ALTA -> MaterialTheme.colorScheme.errorContainer
-        Prioridad.MEDIA -> MaterialTheme.colorScheme.tertiaryContainer
-        Prioridad.BAJA -> MaterialTheme.colorScheme.surfaceVariant
-    }
+    // Colores semánticos del tema: alta = peligro, media = advertencia, baja = neutro.
+    val colorObjetivo = MaterialTheme.coloresApp.paraPrioridad(prioridad).fondo
     // Animación: si cambia la prioridad, el color de la tarjeta cambia de forma gradual.
     val colorTarjeta by animateColorAsState(
         targetValue = colorObjetivo,
@@ -161,6 +171,7 @@ private fun TarjetaOportunidad(item: OportunidadItem, modifier: Modifier = Modif
     )
 
     Card(
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize(),
@@ -171,11 +182,7 @@ private fun TarjetaOportunidad(item: OportunidadItem, modifier: Modifier = Modif
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(item.nombre, style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = estadoOp.etiqueta,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
+            InsigniaEstado(estadoOp)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Event, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))

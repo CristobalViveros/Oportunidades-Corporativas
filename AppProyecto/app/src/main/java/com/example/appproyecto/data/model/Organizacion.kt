@@ -14,4 +14,4 @@ data class Organizacion(
     val sitioWeb: String = "",
     val publicoAsociado: String = "",
     val observaciones: String = ""
-)
+)

@@ -24,4 +24,4 @@ interface UsuarioDao {
     /** Ejecutivos activos: a ellos puede asignar oportunidades el supervisor. */
     @Query("SELECT * FROM usuarios WHERE perfil = 'EJECUTIVO' AND activo = 1 ORDER BY nombre")
     fun observarEjecutivos(): Flow<List<Usuario>>
-}
+}

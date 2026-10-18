@@ -74,6 +74,14 @@ enum class TipoAccion(val etiqueta: String) {
     CIERRE("Cierre")
 }
 
+/** Acciones que implican hablar con alguien: deben registrar con qué contacto. */
+val TipoAccion.requiereContacto: Boolean
+    get() = when (this) {
+        TipoAccion.PRIMER_CONTACTO, TipoAccion.ENVIO_PRESENTACION, TipoAccion.ENVIO_PROPUESTA,
+        TipoAccion.LLAMADA, TipoAccion.REUNION, TipoAccion.RECEPCION_RESPUESTA -> true
+        else -> false
+    }
+
 /** Convierte un texto guardado en la base de datos de vuelta a su enum. */
 inline fun <reified T : Enum<T>> String.aEnum(porDefecto: T): T =
-    enumValues<T>().firstOrNull { it.name == this } ?: porDefecto
+    enumValues<T>().firstOrNull { it.name == this } ?: porDefecto
