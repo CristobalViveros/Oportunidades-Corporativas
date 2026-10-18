@@ -8,10 +8,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.appproyecto.ui.login.LoginScreen
 import com.example.appproyecto.util.SesionManager
-
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.appproyecto.ui.oportunidades.OportunidadFormScreen
 object Rutas {
     const val LOGIN = "login"
     const val PRINCIPAL = "principal"
+    const val FORMULARIO = "formulario/{id}"
+    fun formulario(id: Long) = "formulario/$id"
 }
 
 @Composable
@@ -41,10 +45,15 @@ fun Navegacion() {
                         popUpTo(Rutas.PRINCIPAL) { inclusive = true }
                     }
                 },
-                onNuevaOportunidad = {
-                    // Se conecta con el formulario en la próxima tanda.
-                }
+                onNuevaOportunidad = { navController.navigate(Rutas.formulario(0L)) },
+                onEditarOportunidad = { id -> navController.navigate(Rutas.formulario(id)) }
             )
+        }
+        composable(
+            route = Rutas.FORMULARIO,
+            arguments = listOf(navArgument("id") { type = NavType.LongType })
+        ) {
+            OportunidadFormScreen(onVolver = { navController.popBackStack() })
         }
     }
 }

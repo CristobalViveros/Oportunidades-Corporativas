@@ -31,7 +31,8 @@ enum class Pestana(val ruta: String, val titulo: String, val icono: ImageVector)
 @Composable
 fun PrincipalScreen(
     onCerrarSesion: () -> Unit,
-    onNuevaOportunidad: () -> Unit
+    onNuevaOportunidad: () -> Unit,
+    onEditarOportunidad: (Long) -> Unit
 ) {
     val navController = rememberNavController()
     val entradaActual by navController.currentBackStackEntryAsState()
@@ -71,7 +72,7 @@ fun PrincipalScreen(
             startDestination = Pestana.OPORTUNIDADES.ruta,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Pestana.OPORTUNIDADES.ruta) { OportunidadesScreen() }
+            composable(Pestana.OPORTUNIDADES.ruta) { OportunidadesScreen(onEditar = onEditarOportunidad) }
             composable(Pestana.PERFIL.ruta) { PerfilScreen(onCerrarSesion = onCerrarSesion) }
         }
     }
