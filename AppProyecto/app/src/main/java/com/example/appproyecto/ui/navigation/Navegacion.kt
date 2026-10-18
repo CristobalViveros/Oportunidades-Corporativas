@@ -8,10 +8,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.appproyecto.ui.login.LoginScreen
 import com.example.appproyecto.util.SesionManager
-
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.appproyecto.ui.oportunidades.OportunidadFormScreen
+import com.example.appproyecto.ui.eventos.EventoFormScreen
 object Rutas {
     const val LOGIN = "login"
     const val PRINCIPAL = "principal"
+    const val FORMULARIO = "formulario/{id}"
+    fun formulario(id: Long) = "formulario/$id"
+
+    const val EVENTO_NUEVO = "evento_nuevo"
 }
 
 @Composable
@@ -41,10 +48,16 @@ fun Navegacion() {
                         popUpTo(Rutas.PRINCIPAL) { inclusive = true }
                     }
                 },
-                onNuevaOportunidad = {
-                    // Se conecta con el formulario en la próxima tanda.
-                }
+                onNuevaOportunidad = { navController.navigate(Rutas.formulario(0L)) },
+                onEditarOportunidad = { id -> navController.navigate(Rutas.formulario(id)) },
+                onNuevoEvento = { navController.navigate(Rutas.EVENTO_NUEVO) }
             )
+        }
+        composable(
+            route = Rutas.FORMULARIO,
+            arguments = listOf(navArgument("id") { type = NavType.LongType })
+        ) {
+            OportunidadFormScreen(onVolver = { navController.popBackStack() })
         }
     }
 }

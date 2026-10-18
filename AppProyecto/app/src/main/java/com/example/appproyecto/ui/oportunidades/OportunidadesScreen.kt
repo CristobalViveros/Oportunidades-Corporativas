@@ -47,7 +47,7 @@ import com.example.appproyecto.util.formatearFecha
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OportunidadesScreen(viewModel: OportunidadesViewModel = viewModel()) {
+fun OportunidadesScreen(onEditar: (Long) -> Unit, viewModel: OportunidadesViewModel = viewModel()) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {

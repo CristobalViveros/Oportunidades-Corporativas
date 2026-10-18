@@ -22,16 +22,21 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.appproyecto.ui.oportunidades.OportunidadesScreen
 import com.example.appproyecto.ui.perfil.PerfilScreen
+import com.example.appproyecto.ui.eventos.EventosScreen
+import androidx.compose.material.icons.filled.Event
 
 enum class Pestana(val ruta: String, val titulo: String, val icono: ImageVector) {
     OPORTUNIDADES("oportunidades", "Oportunidades", Icons.Filled.Work),
+    EVENTOS("eventos", "Eventos", Icons.Filled.Event),
     PERFIL("perfil", "Perfil", Icons.Filled.Person)
 }
 
 @Composable
 fun PrincipalScreen(
     onCerrarSesion: () -> Unit,
-    onNuevaOportunidad: () -> Unit
+    onNuevaOportunidad: () -> Unit,
+    onEditarOportunidad: (Long) -> Unit,
+    onNuevoEvento: () -> Unit
 ) {
     val navController = rememberNavController()
     val entradaActual by navController.currentBackStackEntryAsState()
@@ -41,9 +46,12 @@ fun PrincipalScreen(
         // Cada pantalla interna maneja su propio TopAppBar, así evitamos espacios dobles.
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
-            if (rutaActual == Pestana.OPORTUNIDADES.ruta) {
-                FloatingActionButton(onClick = onNuevaOportunidad) {
+            when (rutaActual) {
+                Pestana.OPORTUNIDADES.ruta -> FloatingActionButton(onClick = onNuevaOportunidad) {
                     Icon(Icons.Filled.Add, contentDescription = "Nueva oportunidad")
+                }
+                Pestana.EVENTOS.ruta -> FloatingActionButton(onClick = onNuevoEvento) {
+                    Icon(Icons.Filled.Add, contentDescription = "Nuevo evento")
                 }
             }
         },
@@ -71,8 +79,9 @@ fun PrincipalScreen(
             startDestination = Pestana.OPORTUNIDADES.ruta,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Pestana.OPORTUNIDADES.ruta) { OportunidadesScreen() }
+            composable(Pestana.OPORTUNIDADES.ruta) { OportunidadesScreen(onEditar = onEditarOportunidad) }
             composable(Pestana.PERFIL.ruta) { PerfilScreen(onCerrarSesion = onCerrarSesion) }
+            composable(Pestana.EVENTOS.ruta) { EventosScreen() }
         }
     }
 }
