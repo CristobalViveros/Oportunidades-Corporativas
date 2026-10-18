@@ -4,6 +4,7 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.Query
 import com.example.appproyecto.data.model.Usuario
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UsuarioDao {
@@ -19,4 +20,8 @@ interface UsuarioDao {
 
     @Query("SELECT COUNT(*) FROM usuarios")
     suspend fun contar(): Int
+
+    /** Ejecutivos activos: a ellos puede asignar oportunidades el supervisor. */
+    @Query("SELECT * FROM usuarios WHERE perfil = 'EJECUTIVO' AND activo = 1 ORDER BY nombre")
+    fun observarEjecutivos(): Flow<List<Usuario>>
 }

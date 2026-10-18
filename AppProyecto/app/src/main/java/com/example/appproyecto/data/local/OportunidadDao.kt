@@ -22,11 +22,13 @@ interface OportunidadDao {
     @Query("SELECT * FROM oportunidades WHERE responsableId = :usuarioId ORDER BY fechaActualizacion DESC")
     fun observarPorResponsable(usuarioId: Long): Flow<List<Oportunidad>>
 
+    /** Todas las oportunidades (solo para el supervisor; el repositorio lo controla). */
     @Query("""
         SELECT o.id AS id, o.nombre AS nombre, o.estado AS estado, o.prioridad AS prioridad,
                o.potencial AS potencial,
                e.nombre AS eventoNombre, e.fechaInicio AS eventoFecha, e.comuna AS comuna,
-               g.nombre AS organizacionNombre, u.nombre AS responsableNombre
+               g.nombre AS organizacionNombre,
+               u.id AS responsableId, u.nombre AS responsableNombre
         FROM oportunidades o
         INNER JOIN eventos e ON e.id = o.eventoId
         INNER JOIN organizaciones g ON g.id = e.organizacionId
@@ -34,4 +36,20 @@ interface OportunidadDao {
         ORDER BY e.fechaInicio
     """)
     fun observarItems(): Flow<List<OportunidadItem>>
+
+    /** Solo las oportunidades de un ejecutivo. */
+    @Query("""
+        SELECT o.id AS id, o.nombre AS nombre, o.estado AS estado, o.prioridad AS prioridad,
+               o.potencial AS potencial,
+               e.nombre AS eventoNombre, e.fechaInicio AS eventoFecha, e.comuna AS comuna,
+               g.nombre AS organizacionNombre,
+               u.id AS responsableId, u.nombre AS responsableNombre
+        FROM oportunidades o
+        INNER JOIN eventos e ON e.id = o.eventoId
+        INNER JOIN organizaciones g ON g.id = e.organizacionId
+        INNER JOIN usuarios u ON u.id = o.responsableId
+        WHERE o.responsableId = :usuarioId
+        ORDER BY e.fechaInicio
+    """)
+    fun observarItemsPorResponsable(usuarioId: Long): Flow<List<OportunidadItem>>
 }

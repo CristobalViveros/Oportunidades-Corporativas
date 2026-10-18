@@ -3,6 +3,7 @@ package com.example.appproyecto.data.repository
 import com.example.appproyecto.data.local.UsuarioDao
 import com.example.appproyecto.data.model.Usuario
 import com.example.appproyecto.util.sha256
+import kotlinx.coroutines.flow.Flow
 
 class UsuarioRepository(private val usuarioDao: UsuarioDao) {
 
@@ -13,4 +14,6 @@ class UsuarioRepository(private val usuarioDao: UsuarioDao) {
     }
 
     suspend fun obtenerPorId(id: Long): Usuario? = usuarioDao.obtenerPorId(id)
+
+    fun observarEjecutivos(): Flow<List<Usuario>> = usuarioDao.observarEjecutivos()
 }

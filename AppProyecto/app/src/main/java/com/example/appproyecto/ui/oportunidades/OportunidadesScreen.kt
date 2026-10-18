@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -41,17 +42,25 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appproyecto.data.model.EstadoOportunidad
 import com.example.appproyecto.data.model.OportunidadItem
+import com.example.appproyecto.data.model.Perfil
 import com.example.appproyecto.data.model.Prioridad
 import com.example.appproyecto.data.model.aEnum
 import com.example.appproyecto.util.formatearFecha
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OportunidadesScreen(onEditar: (Long) -> Unit, viewModel: OportunidadesViewModel = viewModel()) {
+fun OportunidadesScreen(viewModel: OportunidadesViewModel = viewModel()) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text("Oportunidades") })
+        TopAppBar(
+            title = {
+                Text(
+                    if (estado.perfil == Perfil.SUPERVISOR) "Todas las oportunidades"
+                    else "Mis oportunidades"
+                )
+            }
+        )
 
         OutlinedTextField(
             value = estado.busqueda,
@@ -104,6 +113,14 @@ fun OportunidadesScreen(onEditar: (Long) -> Unit, viewModel: OportunidadesViewMo
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         )
+
+        if (estado.cargando) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(24.dp)
+            )
+        }
 
         // Animación: el mensaje de "sin resultados" aparece y desaparece suavemente.
         AnimatedVisibility(visible = estado.oportunidades.isEmpty() && !estado.cargando) {

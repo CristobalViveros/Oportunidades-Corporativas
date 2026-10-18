@@ -9,6 +9,7 @@ import com.example.appproyecto.data.model.Contacto
 import com.example.appproyecto.data.model.Evento
 import com.example.appproyecto.data.model.Oportunidad
 import com.example.appproyecto.data.model.Organizacion
+import com.example.appproyecto.data.model.Seguimiento
 import com.example.appproyecto.data.model.Usuario
 
 @Database(
@@ -17,7 +18,8 @@ import com.example.appproyecto.data.model.Usuario
         Organizacion::class,
         Contacto::class,
         Evento::class,
-        Oportunidad::class
+        Oportunidad::class,
+        Seguimiento::class
     ],
     version = 1,
     exportSchema = false
@@ -28,6 +30,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun contactoDao(): ContactoDao
     abstract fun eventoDao(): EventoDao
     abstract fun oportunidadDao(): OportunidadDao
+    abstract fun seguimientoDao(): SeguimientoDao
 
     companion object {
         @Volatile
