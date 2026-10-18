@@ -11,11 +11,14 @@ import com.example.appproyecto.util.SesionManager
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.appproyecto.ui.oportunidades.OportunidadFormScreen
+import com.example.appproyecto.ui.eventos.EventoFormScreen
 object Rutas {
     const val LOGIN = "login"
     const val PRINCIPAL = "principal"
     const val FORMULARIO = "formulario/{id}"
     fun formulario(id: Long) = "formulario/$id"
+
+    const val EVENTO_NUEVO = "evento_nuevo"
 }
 
 @Composable
@@ -46,7 +49,8 @@ fun Navegacion() {
                     }
                 },
                 onNuevaOportunidad = { navController.navigate(Rutas.formulario(0L)) },
-                onEditarOportunidad = { id -> navController.navigate(Rutas.formulario(id)) }
+                onEditarOportunidad = { id -> navController.navigate(Rutas.formulario(id)) },
+                onNuevoEvento = { navController.navigate(Rutas.EVENTO_NUEVO) }
             )
         }
         composable(
