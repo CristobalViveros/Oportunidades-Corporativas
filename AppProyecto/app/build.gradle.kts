@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -60,4 +61,18 @@ dependencies {
     implementation(libs.androidx.sqlite.bundled)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+}
+
+kover {
+    reports {
+        filters {
+            includes {
+                classes(
+                    "com.example.appproyecto.util.*",
+                    "com.example.appproyecto.data.repository.*",
+                    "com.example.appproyecto.ui.**.*ViewModel*"
+                )
+            }
+        }
+    }
 }
